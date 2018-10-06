@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/lumen/bootstrap.min.css">
-    <link href="stylesheets/style.css" rel="stylesheet">
+    <link href="styles/styles.css" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
         crossorigin="anonymous">
 
@@ -40,7 +40,8 @@
                 <h2>Excercise Cal-Culator</h2>
                 <form>
                     <div class="form-group">
-                        <label for="exampleInputEmail1">Write out your activity below to cal-culate your calories burned</label>
+                        <label for="exampleInputEmail1">Write out your activity below to cal-culate your calories
+                            burned</label>
                         <input type="text" class="form-control" id="workout-input" placeholder="Ex. Running for 20 minutes">
                     </div>
                     <button type="submit" class="btn btn-default" id="workout-button">Submit</button>
@@ -60,7 +61,8 @@
                 <h2>Food Cal-Culator</h2>
                 <form>
                     <div class="form-group">
-                        <label for="exampleInputEmail1">Write out the food you've eaten below to cal-culate your calories consumed</label>
+                        <label for="exampleInputEmail1">Write out the food you've eaten below to cal-culate your
+                            calories consumed</label>
                         <input type="text" class="form-control" id="food-input" placeholder="2 bananas">
                     </div>
                     <button type="submit" class="btn btn-default" id="food-button">Submit</button>
@@ -78,38 +80,18 @@
     <!-- Inline JS for now -->
     <script>
         //Global variables
-        var rapid = new RapidAPI("default-application_5bb6e0b2e4b085e3f4087a6f", "fa960f0e-9c7c-4e96-9c1c-a9529be412e5");
+        // var rapid = new RapidAPI("default-application_5bb6e0b2e4b085e3f4087a6f", "fa960f0e-9c7c-4e96-9c1c-a9529be412e5");
 
         $("#workout-button").click(function (event) {
             //Prevent page from reloading
             event.preventDefault();
 
             //Grabs the user inputed workout from the text form
-            var userWorkout = $("#workout-input").val().trim();
-
-            //Call to get a "calories burned" response from Nutritionix API
-            rapid.call('Nutritionix', 'getCaloriesBurnedForExercises', {
-                'applicationSecret': '1cda535374b6a8253ab9d3e5a2811c41',
-                'applicationId': 'd93ce29b',
-                'exerciseDescription': userWorkout
-
-            }).on('success', function (payload) {
-                console.log(payload);
-
-                for (var i = 0; i < 1; i++) {
-
-                    var workout = payload[i].exercises[i].name;
-                    var calories = Math.round(payload[i].exercises[i].nf_calories);
-
-                    console.log("Activity: " + workout);
-                    console.log("Calories Burned: " + calories);
-
-                    $("#workout-calorie-count").text("Calories Burned: " + calories);
-                }
-            }).on('error', function (payload) {
-                console.log("Error");
-            });
-
+            var userWork = $("#workout-input").val().trim();
+            $("#workout-input").empty();
+            $.post("/api/calcwork", {
+                userWork: userWork
+            })
         })
 
         $("#food-button").click(function (event) {
@@ -118,33 +100,10 @@
 
             //Grabs the user inputed food from the text form
             var userFood = $("#food-input").val().trim();
-
-            //Call to get a "calories burned" response from Nutritionix API
-            rapid.call('Nutritionix', 'getFoodsNutrients', {
-                'applicationSecret': '1cda535374b6a8253ab9d3e5a2811c41',
-                'foodDescription': userFood,
-                'applicationId': 'd93ce29b'
-
-            }).on('success', function (payload) {
-                console.log(payload);
-
-                for (var i = 0; i < 1; i++) {
-
-                    var food = payload[i].foods[i].food_name;
-                    var caloriesFood = Math.round(payload[i].foods[i].nf_calories);
-                    var serving = payload[i].foods[i].serving_qty;
-
-                    console.log("Food: " + food);
-                    console.log("Calories Consumed: " + caloriesFood);
-
-                    $("#food-calorie-count").text("Food Logged: " + serving + " " + food);
-                    $("#food-calorie-count").append("<p>" + "Calories Consumed: " + caloriesFood + "<p>");
-
-                }
-
-            }).on('error', function (payload) {
-                console.log("Error");
-            });
+            $("#food-input").empty();
+            $.post("/api/calcfood", {
+                userFood: userFood
+            })
         })
 
 
