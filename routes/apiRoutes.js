@@ -7,29 +7,6 @@ var rapid = new RapidAPI(
 );
 
 module.exports = function(app) {
-  // Get all examples
-  app.get("/api/examples", function(req, res) {
-    db.Example.findAll({}).then(function(dbExamples) {
-      res.json(dbExamples);
-    });
-  });
-
-  // Create a new example
-  app.post("/api/examples", function(req, res) {
-    db.Example.create(req.body).then(function(dbExample) {
-      res.json(dbExample);
-    });
-  });
-
-  // Delete an example by id
-  app.delete("/api/examples/:id", function(req, res) {
-    db.Example.destroy({ where: { id: req.params.id } }).then(function(
-      dbExample
-    ) {
-      res.json(dbExample);
-    });
-  });
-
   // Using the passport.authenticate middleware with our local strategy.
   // If the user has valid login credentials, send them to the members page.
   // Otherwise the user will be sent an error
@@ -80,8 +57,33 @@ module.exports = function(app) {
     }
   });
 
+  app.get("/api/burns", function(req, res) {
+    db.Cal.findAll({}).then(function(result) {
+      res.json(result);
+    });
+  });
+
+  app.get("/api/intake", function(req, res) {
+    db.Food.findAll({}).then(function(result) {
+      res.json(result);
+    });
+  });
+
+  app.get("/api/summary", function(req, res) {
+    var summary = [];
+    db.Cal.findAll({}).then(function(calres) {
+      summary.push(calres);
+      db.Food.findAll({})
+        .then(function(foodres) {
+          summary.push(foodres);
+        })
+        .then(function() {
+          res.json(summary);
+        });
+    });
+  });
+
   app.post("/api/calcwork", function(req, res) {
-    console.log(req.body);
     //Call to get a "calories burned" response from Nutritionix API
     rapid
       .call("Nutritionix", "getCaloriesBurnedForExercises", {
@@ -91,12 +93,22 @@ module.exports = function(app) {
       })
       .on("success", function(payload) {
         var calories = 0;
+        var duration = 0;
         for (var i = 0; i < payload[0].exercises.length; i++) {
           calories += Math.round(payload[0].exercises[i].nf_calories);
+          duration += Math.round(payload[0].exercises[i].duration_min);
         }
-        console.log("Activity: " + payload[0].exercises[0].name);
-        console.log("Calories Burned: " + calories);
-        res.json(payload);
+
+        if (req.body.userEmail) {
+          db.Cal.create({
+            user: req.body.userEmail,
+            exercise: payload[0].exercises[0].name,
+            duration: duration,
+            calories: calories
+          }).then(function(dbCal) {
+            res.json(dbCal);
+          });
+        }
       })
       .on("error", function() {
         console.log("Error");
@@ -104,7 +116,6 @@ module.exports = function(app) {
   });
 
   app.post("/api/calcfood", function(req, res) {
-    console.log(req.body);
     //Call to get a "calories burned" response from Nutritionix API
     rapid
       .call("Nutritionix", "getFoodsNutrients", {
@@ -113,21 +124,21 @@ module.exports = function(app) {
         applicationId: "d93ce29b"
       })
       .on("success", function(payload) {
-        console.log(payload);
+        for (var i = 0; i < payload[0].foods.length; i++) {
+          var food = payload[0].foods[i].food_name;
+          var caloriesFood = Math.round(payload[0].foods[i].nf_calories);
+          var serving = payload[0].foods[i].serving_qty;
 
-        for (var i = 0; i < 1; i++) {
-          var food = payload[i].foods[i].food_name;
-          var caloriesFood = Math.round(payload[i].foods[i].nf_calories);
-          var serving = payload[i].foods[i].serving_qty;
-
-          console.log("Food: " + food);
-          console.log("Calories Consumed: " + caloriesFood);
-          console.log("Food Logged: " + serving + " " + food);
-          // $("#food-calorie-count").text("Food Logged: " + serving + " " + food);
-          // $("#food-calorie-count").append(
-          //  "<p>" + "Calories Consumed: " + caloriesFood + "<p>"
+          if (req.body.userEmail) {
+            db.Food.create({
+              user: req.body.userEmail,
+              food: food,
+              servings: serving,
+              calories: caloriesFood
+            });
+          }
+          res.json(payload);
         }
-        res.json(payload);
       })
       .on("error", function() {
         console.log("Error");
