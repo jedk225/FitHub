@@ -129,6 +129,17 @@ module.exports = function(app) {
           var caloriesFood = Math.round(payload[0].foods[i].nf_calories);
           var serving = payload[0].foods[i].serving_qty;
 
+          // Macros (Carbs, Protein, and Fat) in grams
+          var carbs = Math.round(payload[0].foods[i].nf_total_carbohydrate);
+          var proteins = Math.round(payload[0].foods[i].nf_protein);
+          var fat = Math.round(payload[0].foods[i].nf_total_fat);
+
+          console.log("Carbs: " + carbs + "g");
+          console.log("Protein: " + proteins + "g");
+          console.log("Fat: " + fat + "g");
+
+          //Need to add macros variables to create method
+
           if (req.body.userEmail) {
             db.Food.create({
               user: req.body.userEmail,
