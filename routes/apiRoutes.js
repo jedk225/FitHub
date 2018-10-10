@@ -1,6 +1,7 @@
 var db = require("../models");
 var passport = require("../config/passport");
 var RapidAPI = require("rapidapi-connect");
+var health = require("healthstats");
 var rapid = new RapidAPI(
   "default-application_5bb6e0b2e4b085e3f4087a6f",
   "fa960f0e-9c7c-4e96-9c1c-a9529be412e5"
@@ -32,7 +33,7 @@ module.exports = function(app) {
       .catch(function(err) {
         console.log(err);
         res.json(err);
-        // res.status(422).json(err.errors[0].message);
+        res.status(422).json(err.errors[0].message);
       });
   });
 
@@ -57,23 +58,69 @@ module.exports = function(app) {
     }
   });
 
+  // Route for getting user health profile
+  app.get("/api/health", function(req, res) {
+    db.Health.findOne({
+      where: { user: req.query.userEmail }
+    })
+      .then(function(data) {
+        res.json(data);
+      })
+      .catch(function(err) {
+        console.log(err);
+        res.json(false);
+      });
+  });
+
+  // Route for posting new user health profile
+  app.post("/api/health", function(req, res) {
+    console.log(req.body);
+    var sex = "female";
+    if (req.body.sex === "Male") {
+      sex = "male";
+    }
+    var BMI = health[sex].BMI(req.body.weight, req.body.height);
+    var BMR = health[sex].BMR(req.body.weight, req.body.height, req.body.age);
+    console.log("BMI is : " + BMI);
+    console.log("BMR is : " + BMR);
+    db.Health.create({
+      user: req.body.user,
+      sex: req.body.sex,
+      age: req.body.age,
+      height: req.body.height,
+      weight: req.body.weight,
+      BMI: BMI,
+      BMR: BMR
+    }).then(function(data) {
+      res.json(data);
+    });
+  });
+
   app.get("/api/burns", function(req, res) {
-    db.Cal.findAll({}).then(function(result) {
+    db.Cal.findAll({
+      order: [["createdAt", "DESC"]],
+      where: { user: req.query.userEmail }
+    }).then(function(result) {
       res.json(result);
     });
   });
 
   app.get("/api/intake", function(req, res) {
-    db.Food.findAll({}).then(function(result) {
+    db.Food.findAll({
+      order: [["createdAt", "DESC"]],
+      where: { user: req.query.userEmail }
+    }).then(function(result) {
       res.json(result);
     });
   });
 
   app.get("/api/summary", function(req, res) {
     var summary = [];
-    db.Cal.findAll({}).then(function(calres) {
+    db.Cal.findAll({ where: { user: req.query.userEmail } }).then(function(
+      calres
+    ) {
       summary.push(calres);
-      db.Food.findAll({})
+      db.Food.findAll({ where: { user: req.query.userEmail } })
         .then(function(foodres) {
           summary.push(foodres);
         })
@@ -125,6 +172,7 @@ module.exports = function(app) {
       })
       .on("success", function(payload) {
         for (var i = 0; i < payload[0].foods.length; i++) {
+          console.log(payload[0].foods[i]);
           var food = payload[0].foods[i].food_name;
           var caloriesFood = Math.round(payload[0].foods[i].nf_calories);
           var serving = payload[0].foods[i].serving_qty;
@@ -134,22 +182,19 @@ module.exports = function(app) {
           var proteins = Math.round(payload[0].foods[i].nf_protein);
           var fat = Math.round(payload[0].foods[i].nf_total_fat);
 
-          console.log("Carbs: " + carbs + "g");
-          console.log("Protein: " + proteins + "g");
-          console.log("Fat: " + fat + "g");
-
-          //Need to add macros variables to create method
-
           if (req.body.userEmail) {
             db.Food.create({
               user: req.body.userEmail,
               food: food,
               servings: serving,
-              calories: caloriesFood
+              calories: caloriesFood,
+              carbs: carbs,
+              protein: proteins,
+              fat: fat
             });
           }
-          res.json(payload);
         }
+        res.send(payload[0].foods);
       })
       .on("error", function() {
         console.log("Error");
