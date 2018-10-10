@@ -20,6 +20,7 @@
     "firebase": "^5.5.3",
     "healthstats": "^1.0.4",
     "mysql2": "^1.5.3",
+    "npm": "^6.4.1",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "passport-strategy": "^1.0.0",
