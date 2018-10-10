@@ -3,7 +3,10 @@ module.exports = function(sequelize, DataTypes) {
     user: DataTypes.STRING,
     food: DataTypes.STRING,
     servings: DataTypes.INTEGER,
-    calories: DataTypes.INTEGER
+    calories: DataTypes.INTEGER,
+    carbs: DataTypes.INTEGER,
+    protein: DataTypes.INTEGER,
+    fat: DataTypes.INTEGER
   });
   return Food;
 };
