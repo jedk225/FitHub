@@ -1,0 +1,22 @@
+
+body {
+    background: url('../images/background.jpg') 50% 0 no-repeat;
+    display: block;
+    position: relative;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.centerThis {
+    margin: auto;
+    text-align: center;
+}
+
+.loginCard {
+   margin: auto;
+   text-align: center;
+   margin-top: 20vh;
+   width: 60%;
+}
