@@ -17,11 +17,11 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     weight: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false
     },
     BMI: {
-      type: DataTypes.DECIMAL
+      type: DataTypes.FLOAT
     },
     BMR: {
       type: DataTypes.DECIMAL

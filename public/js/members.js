@@ -67,10 +67,48 @@ $(document).ready(function() {
   var userHub = "";
   //Hub Display
   function hubDisp() {
-    $(".disp").html("");
+    $(".disp").html("<br><div class='container hubDisp'></div>");
+    var heightCalc = (userHub.height - (userHub.height % 12)) / 12;
+    $(".hubDisp").append("<h3 class='stat'>Age - " + userHub.age + "</h3>");
+    $(".hubDisp").append("<h3 class='stat'>Sex - " + userHub.sex + "</h3>");
+    $(".hubDisp").append(
+      "<h3 class='stat'>Weight - " + userHub.weight + "lbs</h3>"
+    );
+    $(".hubDisp").append(
+      "<h3 class='stat'>Height - " +
+        heightCalc +
+        "ft " +
+        (userHub.height % 12) +
+        "in</h3>"
+    );
+    $(".hubDisp").append("<h3 class='stat'>BMI - " + userHub.BMI + "</h3>");
+    $(".hubDisp").append(
+      "<h3 class='stat'>BMR - " + userHub.BMR + " Kcal/day</h3>"
+    );
     console.log(userHub);
+    var picSrc = "";
+    var BMI = parseInt(userHub.BMI);
+    if (BMI < 18) {
+      picSrc = "skele.jpg";
+    } else if ((18 <= BMI) & (BMI < 22)) {
+      picSrc = userHub.sex + "-1.jpg";
+    } else if ((22 <= BMI) & (BMI < 25)) {
+      picSrc = userHub.sex + "-2.jpg";
+    } else if ((25 <= BMI) & (BMI < 28)) {
+      picSrc = userHub.sex + "-3.jpg";
+    } else if ((28 <= BMI) & (BMI < 31)) {
+      picSrc = userHub.sex + "-4.jpg";
+    } else if ((31 <= BMI) & (BMI < 34)) {
+      picSrc = userHub.sex + "-5.jpg";
+    } else if (34 <= BMI) {
+      picSrc = userHub.sex + "-6.jpg";
+    }
+    $(".hubDisp").append(
+      "<img style='width:250;height:400;position:relative;top:-300;right:-500' src='../images/" +
+        picSrc +
+        "'/>"
+    );
   }
-
   //My FitHub
   $("#hub").click(function(event) {
     event.preventDefault();
@@ -219,31 +257,36 @@ $(document).ready(function() {
       burn: 0,
       intake: 0,
       deficit: 0,
-      surplus: 0
-    };
-    var macro = {
-      carbs: 0,
-      protein: 0,
-      fat: 0
+      surplus: 0,
+      BMR: 0
     };
     $.get("/api/user_data").then(function(user) {
       $.get("/api/summary", {
         userEmail: user.email
       }).then(function(res) {
+        summary.BMR = parseInt(res[2].BMR);
         for (i = 0; i < res[0].length; i++) {
           summary.burn += parseInt(res[0][i].calories);
         }
         for (i = 0; i < res[1].length; i++) {
           summary.intake += parseInt(res[1][i].calories);
-          macro.carbs += parseInt(res[1][i].carbs);
-          macro.protein += parseInt(res[1][i].protein);
-          macro.fat += parseInt(res[1][i].fat);
         }
-        if (summary.intake > summary.burn) {
-          summary.surplus = summary.intake - summary.burn;
+        if (summary.intake > summary.burn + summary.BMR) {
+          summary.surplus = summary.intake - summary.burn - summary.BMR;
         } else {
-          summary.deficit = summary.burn - summary.intake;
+          summary.deficit = summary.burn + summary.BMR - summary.intake;
         }
+
+        var chartColors = {
+          red: "rgb(255, 99, 132)",
+          orange: "rgb(255, 159, 64)",
+          yellow: "rgb(255, 205, 86)",
+          green: "rgb(75, 192, 192)",
+          blue: "rgb(54, 162, 235)",
+          purple: "rgb(153, 102, 255)",
+          grey: "rgb(231,233,237)",
+          black: "rgb(255,255,255)"
+        };
 
         //create chart
         $(".disp").html("<canvas id='myChart'></canvas>");
@@ -254,13 +297,14 @@ $(document).ready(function() {
 
           // The data for our dataset
           data: {
-            labels: ["Burns", "Intake", "Deficit", "Surplus"],
+            labels: ["BMR", "Burns", "Intake", "Deficit", "Surplus"],
             datasets: [
               {
-                label: "My Daily Summary",
-                backgroundColor: "rgb(255, 99, 132)",
-                borderColor: "rgb(255, 99, 132)",
+                label: "My Caloric Summary",
+                backgroundColor: chartColors.blue,
+                borderColor: chartColors.blue,
                 data: [
+                  summary.BMR,
                   summary.burn,
                   summary.intake,
                   summary.deficit,
@@ -275,9 +319,33 @@ $(document).ready(function() {
             scales: {
               yAxes: [
                 {
+                  gridLines: {
+                    color: chartColors.yellow
+                  },
                   scaleLabel: {
                     display: true,
-                    labelString: "KCAL"
+                    labelString: "KCAL",
+                    color: chartColors.yellow
+                  },
+                  ticks: {
+                    fontColor: "white",
+                    fontSize: 14
+                  }
+                }
+              ],
+              xAxes: [
+                {
+                  barThickness: 40,
+                  barPercentage: true,
+                  gridLines: {
+                    color: chartColors.yellow
+                  },
+                  scaleLabel: {
+                    color: chartColors.yellow
+                  },
+                  ticks: {
+                    fontColor: "white",
+                    fontSize: 16
                   }
                 }
               ]
@@ -285,6 +353,104 @@ $(document).ready(function() {
           }
         });
         console.log(chart.config.data.datasets[0].label);
+      });
+    });
+  });
+
+  //Get Daily Macros Summary
+  $("#macros").click(function(event) {
+    event.preventDefault();
+    var macro = {
+      carbs: 0,
+      protein: 0,
+      fat: 0,
+      carbsCap: 0,
+      proteinCap: 0,
+      fatCap: 0,
+      carbsMin: 0,
+      proteinMin: 0,
+      fatMin: 0
+    };
+    $.get("/api/user_data").then(function(user) {
+      $.get("/api/summary", {
+        userEmail: user.email
+      }).then(function(res) {
+        var BMR = parseInt(res[2].BMR);
+        macro.carbsCap = (BMR * 0.65) / 4;
+        macro.carbsMin = (BMR * 0.45) / 4;
+        macro.proteinCap = (BMR * 0.35) / 4;
+        macro.proteinMin = (BMR * 0.1) / 4;
+        macro.fatCap = (BMR * 0.35) / 9;
+        macro.fatMin = (BMR * 0.2) / 9;
+        for (i = 0; i < res[1].length; i++) {
+          macro.carbs += parseInt(res[1][i].carbs);
+          macro.protein += parseInt(res[1][i].protein);
+          macro.fat += parseInt(res[1][i].fat);
+        }
+        console.log(macro);
+        var chartColors = {
+          red: "rgb(255, 99, 132)",
+          orange: "rgb(255, 159, 64)",
+          yellow: "rgb(255, 205, 86)",
+          green: "rgb(75, 192, 192)",
+          blue: "rgb(54, 162, 235)",
+          purple: "rgb(153, 102, 255)",
+          grey: "rgb(231,233,237)",
+          black: "rgb(255,255,255)",
+          bluebg: "rgb(54, 162, 235, 0.2)",
+          redbg: "rgb(255, 99, 132, 0.2)",
+          yellowbg: "rgb(255, 205, 86, 0.2)"
+        };
+
+        //create chart
+        $(".disp").html("<canvas id='myChart'></canvas>");
+        var ctx = document.getElementById("myChart").getContext("2d");
+        var chart = new Chart(ctx, {
+          // The type of chart we want to create
+          type: "radar",
+
+          // The data for our dataset
+          data: {
+            labels: ["Carbohydrates (g)", "Proteins (g)", "Fats(g)"],
+            datasets: [
+              {
+                label: "My Macros Intake",
+                backgroundColor: chartColors.bluebg,
+                borderColor: chartColors.blue,
+                data: [macro.carbs, macro.protein, macro.fat],
+                fill: true
+              },
+              {
+                label: "Macros Limit",
+                backgroundColor: chartColors.redbg,
+                borderColor: chartColors.red,
+                data: [macro.carbsCap, macro.proteinCap, macro.fatCap],
+                fill: true
+              },
+              {
+                label: "Macros Minimum",
+                backgroundColor: chartColors.yellowbg,
+                borderColor: chartColors.yellow,
+                data: [macro.carbsMin, macro.proteinMin, macro.fatMin],
+                fill: true
+              }
+            ]
+          },
+
+          // Configuration options go here
+          options: {
+            scale: {
+              pointLabels: {
+                fontSize: 20,
+                fontColor: "black"
+              }
+            },
+            elements: { line: { tension: 0, borderWidth: 3 } }
+          }
+        });
+        console.log(chart.config.data.datasets[0].label);
+        //new Chart(document.getElementById("chartjs-3"),{"type":"radar","data":{"labels":["Eating","Drinking","Sleeping","Designing","Coding","Cycling","Running"]
+        //,"datasets":[{"label":"My First Dataset","data":[65,59,90,81,56,55,40],"fill":true,"backgroundColor":"rgba(255, 99, 132, 0.2)","borderColor":"rgb(255, 99, 132)","pointBackgroundColor":"rgb(255, 99, 132)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgb(255, 99, 132)"},{"label":"My Second Dataset","data":[28,48,40,19,96,27,100],"fill":true,"backgroundColor":"rgba(54, 162, 235, 0.2)","borderColor":"rgb(54, 162, 235)","pointBackgroundColor":"rgb(54, 162, 235)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgb(54, 162, 235)"}]},"options":{"elements":{"line":{"tension":0,"borderWidth":3}}}});
       });
     });
   });
