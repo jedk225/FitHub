@@ -79,8 +79,10 @@ module.exports = function(app) {
     if (req.body.sex === "Male") {
       sex = "male";
     }
-    var BMI = health[sex].BMI(req.body.weight, req.body.height);
-    var BMR = health[sex].BMR(req.body.weight, req.body.height, req.body.age);
+    var BMI = Math.round(health[sex].BMI(req.body.weight, req.body.height));
+    var BMR = Math.round(
+      health[sex].BMR(req.body.weight, req.body.height, req.body.age)
+    );
     console.log("BMI is : " + BMI);
     console.log("BMR is : " + BMR);
     db.Health.create({
@@ -120,13 +122,18 @@ module.exports = function(app) {
       calres
     ) {
       summary.push(calres);
-      db.Food.findAll({ where: { user: req.query.userEmail } })
-        .then(function(foodres) {
-          summary.push(foodres);
-        })
-        .then(function() {
-          res.json(summary);
-        });
+      db.Food.findAll({ where: { user: req.query.userEmail } }).then(function(
+        foodres
+      ) {
+        summary.push(foodres);
+        db.Health.findOne({ where: { user: req.query.userEmail } })
+          .then(function(healthres) {
+            summary.push(healthres);
+          })
+          .then(function() {
+            res.json(summary);
+          });
+      });
     });
   });
 
