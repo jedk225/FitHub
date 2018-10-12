@@ -1,8 +1,10 @@
 $(document).ready(function() {
   // This file just does a GET request to figure out which user is logged in
   // and updates the HTML on the page
+  var user = "";
   $.get("/api/user_data").then(function(data) {
     $(".member-name").text(data.email);
+    user = data.email;
   });
 
   //Add Activity
@@ -109,79 +111,90 @@ $(document).ready(function() {
         "'/>"
     );
   }
+
+  //Hub Info Input Form
+  function hubInfo() {
+    $(".modal").modal("show");
+    $(".healthForm").off();
+    $(".healthForm").click(function(event) {
+      console.log("clicked on health form");
+      event.preventDefault();
+      $(".disp").html(
+        "<form><div class='form-row'><div class='form-group col-md-4'>" +
+          "<label for='inputAge'>Age</label><input class='form-control' id='inputAge'" +
+          "placeholder='35'></div><div class='form-group col-md-4'><label " +
+          "for='inputSex'>Sex</label><select id='inputSex' class='form-control'><option " +
+          "selected>Choose...</option><option value='male'>Male</option><option value='female'>Female</option><option value='A Lot'>A " +
+          "Lot</option></select></div><div class='form-group col-md-4'>" +
+          "<label for='inputWeight'>Weight (LBS)</label><input class='form-control' id='inputWeight'" +
+          "placeholder='150'></div></div><label for='height'>Height</label><div class='form-row height'>" +
+          "<div class='form-group col-md-3'><input class='form-control' id='inputFt'" +
+          "placeholder='ft'></div><div class='form-group col-md-3'>" +
+          "<input class='form-control' id='inputIn' placeholder='in'></div></div><br><br><button class='btn btn-primary btn-block'" +
+          "id='userInfo'>Submit</button></form>"
+      );
+      $("#userInfo").off();
+      $("#userInfo").click(function(click) {
+        console.log("User info clicked!");
+        click.preventDefault();
+        var age = parseInt(
+          $("#inputAge")
+            .val()
+            .trim()
+        );
+        var sex = $("#inputSex option:selected").attr("value");
+        console.log(sex);
+        if (sex === "A Lot") {
+          sex = "male";
+        }
+        var weight = parseInt(
+          $("#inputWeight")
+            .val()
+            .trim()
+        );
+        var height =
+          parseInt(
+            $("#inputFt")
+              .val()
+              .trim()
+          ) *
+            12 +
+          parseInt(
+            $("#inputIn")
+              .val()
+              .trim()
+          );
+        if (isNaN(age) || isNaN(weight) || isNaN(height)) {
+          console.log("NaN");
+          alert("Please provide valid input!");
+        } else {
+          var userInfo = {
+            user: user,
+            sex: sex,
+            age: age,
+            height: height,
+            weight: weight
+          };
+          $.post("/api/health", userInfo).then(function(res) {
+            if (res) {
+              userHub = res;
+              hubDisp();
+            }
+          });
+        }
+      });
+    });
+  }
+
   //My FitHub
   $("#hub").click(function(event) {
     event.preventDefault();
     $.get("/api/user_data").then(function(data) {
       console.log(data.email);
+      console.log("clicked!");
       $.get("/api/health", { userEmail: data.email }).then(function(res) {
         if (!res) {
-          $(".modal").modal("show");
-          $(".healthForm").click(function(event) {
-            event.preventDefault();
-            $(".disp").html(
-              "<form><div class='form-row'><div class='form-group col-md-4'>" +
-                "<label for='inputAge'>Age</label><input class='form-control' id='inputAge'" +
-                "placeholder='35'></div><div class='form-group col-md-4'><label " +
-                "for='inputSex'>Sex</label><select id='inputSex' class='form-control'><option " +
-                "selected>Choose...</option><option value='Male'>Male</option><option value='Female'>Female</option><option value='A Lot'>A " +
-                "Lot</option></select></div><div class='form-group col-md-4'>" +
-                "<label for='inputWeight'>Weight (LBS)</label><input class='form-control' id='inputWeight'" +
-                "placeholder='150'></div></div><label for='height'>Height</label><div class='form-row height'>" +
-                "<div class='form-group col-md-3'><input class='form-control' id='inputFt'" +
-                "placeholder='ft'></div><div class='form-group col-md-3'>" +
-                "<input class='form-control' id='inputIn' placeholder='in'></div></div><br><br><button class='btn btn-primary btn-block'" +
-                "id='userInfo'>Submit</button></form>"
-            );
-            $("#userInfo").click(function(click) {
-              click.preventDefault();
-              var age = parseInt(
-                $("#inputAge")
-                  .val()
-                  .trim()
-              );
-              var sex = $("#inputSex option:selected").attr("value");
-              console.log(sex);
-              if (sex === "A Lot") {
-                sex = "Male";
-              }
-              var weight = parseInt(
-                $("#inputWeight")
-                  .val()
-                  .trim()
-              );
-              var height =
-                parseInt(
-                  $("#inputFt")
-                    .val()
-                    .trim()
-                ) *
-                  12 +
-                parseInt(
-                  $("#inputIn")
-                    .val()
-                    .trim()
-                );
-              if (isNaN(age) || isNaN(weight) || isNaN(height)) {
-                console.log("NaN");
-                alert("Please provide valid input!");
-              } else {
-                var userInfo = {
-                  user: data.email,
-                  sex: sex,
-                  age: age,
-                  height: height,
-                  weight: weight
-                };
-                $.post("/api/health", userInfo).then(function(res) {
-                  if (res) {
-                    userHub = res;
-                    hubDisp();
-                  }
-                });
-              }
-            });
-          });
+          hubInfo();
         } else {
           userHub = res;
           hubDisp();
@@ -253,6 +266,7 @@ $(document).ready(function() {
   //Get Daily Calorie Summary
   $("#summary").click(function(event) {
     event.preventDefault();
+    console.log("clicked!");
     var summary = {
       burn: 0,
       intake: 0,
@@ -264,6 +278,10 @@ $(document).ready(function() {
       $.get("/api/summary", {
         userEmail: user.email
       }).then(function(res) {
+        if (!res[2]) {
+          hubInfo();
+          return;
+        }
         summary.BMR = parseInt(res[2].BMR);
         for (i = 0; i < res[0].length; i++) {
           summary.burn += parseInt(res[0][i].calories);
@@ -360,6 +378,7 @@ $(document).ready(function() {
   //Get Daily Macros Summary
   $("#macros").click(function(event) {
     event.preventDefault();
+    console.log("clicked!");
     var macro = {
       carbs: 0,
       protein: 0,
@@ -375,6 +394,10 @@ $(document).ready(function() {
       $.get("/api/summary", {
         userEmail: user.email
       }).then(function(res) {
+        if (!res[2]) {
+          hubInfo();
+          return;
+        }
         var BMR = parseInt(res[2].BMR);
         macro.carbsCap = (BMR * 0.65) / 4;
         macro.carbsMin = (BMR * 0.45) / 4;
@@ -397,9 +420,9 @@ $(document).ready(function() {
           purple: "rgb(153, 102, 255)",
           grey: "rgb(231,233,237)",
           black: "rgb(255,255,255)",
-          bluebg: "rgb(54, 162, 235, 0.2)",
-          redbg: "rgb(255, 99, 132, 0.2)",
-          yellowbg: "rgb(255, 205, 86, 0.2)"
+          bluebg: "rgba(54, 162, 235, 0.2)",
+          redbg: "rgba(255, 99, 132, 0.2)",
+          yellowbg: "rgba(255, 205, 86, 0.2)"
         };
 
         //create chart
