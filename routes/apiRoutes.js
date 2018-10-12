@@ -1,7 +1,7 @@
 var db = require("../models");
 var passport = require("../config/passport");
 var RapidAPI = require("rapidapi-connect");
-var health = require("healthstats");
+var health = require("./../utils/index");
 var rapid = new RapidAPI(
   "default-application_5bb6e0b2e4b085e3f4087a6f",
   "fa960f0e-9c7c-4e96-9c1c-a9529be412e5"
@@ -74,25 +74,32 @@ module.exports = function(app) {
 
   // Route for posting new user health profile
   app.post("/api/health", function(req, res) {
-    console.log(req.body);
-    var sex = "female";
-    if (req.body.sex === "Male") {
-      sex = "male";
+    health = require("healthstats");
+    console.log("health: ", health);
+    console.log("Posted to API/health");
+    var bmiVal;
+    var bmrVal;
+    if (req.body.sex === "male") {
+      bmiVal = Math.round(health.male.BMI(req.body.weight, req.body.height));
+      bmrVal = Math.round(
+        health.male.BMR(req.body.weight, req.body.height, req.body.age)
+      );
+    } else {
+      bmiVal = Math.round(health.female.BMI(req.body.weight, req.body.height));
+      bmrVal = Math.round(
+        health.female.BMR(req.body.weight, req.body.height, req.body.age)
+      );
     }
-    var BMI = Math.round(health[sex].BMI(req.body.weight, req.body.height));
-    var BMR = Math.round(
-      health[sex].BMR(req.body.weight, req.body.height, req.body.age)
-    );
-    console.log("BMI is : " + BMI);
-    console.log("BMR is : " + BMR);
+    console.log("BMI is : " + bmiVal);
+    console.log("BMR is : " + bmrVal);
     db.Health.create({
       user: req.body.user,
       sex: req.body.sex,
       age: req.body.age,
       height: req.body.height,
       weight: req.body.weight,
-      BMI: BMI,
-      BMR: BMR
+      BMI: bmiVal,
+      BMR: bmrVal
     }).then(function(data) {
       res.json(data);
     });
