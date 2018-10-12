@@ -104,7 +104,7 @@ $(document).ready(function() {
       picSrc = userHub.sex + "-6.jpg";
     }
     $(".hubDisp").append(
-      "<img style='width:250;height:400;position:relative;top:-300;right:-500' src='../images/" +
+      "<img style='width:250;height:400;position:relative;top:-300;right:-400' src='../images/" +
         picSrc +
         "'/>"
     );

@@ -170,7 +170,7 @@ module.exports = function(app) {
   });
 
   app.post("/api/calcfood", function(req, res) {
-    //Call to get a "calories burned" response from Nutritionix API
+    //Call to get a "calories consumed" response from Nutritionix API
     rapid
       .call("Nutritionix", "getFoodsNutrients", {
         applicationSecret: "1cda535374b6a8253ab9d3e5a2811c41",
