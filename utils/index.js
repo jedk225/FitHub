@@ -1,12 +1,10 @@
 module.exports.male = {
   BMI: function(weight, height) {
     var BMI = (weight / (height * height)) * 703;
-    this.BMI = BMI;
     return BMI;
   },
   BMR: function(weight, height, age) {
     var BMR = 66 + 6.23 * weight + 12.7 * height - 6.8 * age;
-    this.BMR = BMR;
     return BMR;
   },
   noActivity: function(BMR) {
@@ -40,12 +38,10 @@ module.exports.male = {
 module.exports.female = {
   BMI: function(weight, height) {
     var BMI = (weight / (height * height)) * 703;
-    this.BMI = BMI;
     return BMI;
   },
   BMR: function(weight, height, age) {
     var BMR = 655 + 4.35 * weight + 4.7 * height - 4.7 * age;
-    this.BMR = BMR;
     return BMR;
   },
   noActivity: function(BMR) {
