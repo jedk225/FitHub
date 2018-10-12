@@ -31,46 +31,49 @@ describe("GET /api/burns", function() {
         calories: 100
       },
       {
-        user: "lilo11@gmail.com",
+        user: "lilo10@gmail.com",
         exercise: "sprinting",
         duration: 30,
         calories: 300
       }
     ]).then(function() {
-      request.get("/api/burns").end(function(err, res) {
-        var responseStatus = res.status;
-        var responseBody = res.body;
+      request
+        .get("/api/burns?userEmail=lilo10@gmail.com")
+        .end(function(err, res) {
+          var responseStatus = res.status;
+          var responseBody = res.body;
 
-        console.log("responseBody: " + responseBody);
+          console.log(res);
+          console.log("responseBody: " + responseBody);
 
-        expect(err).to.be.null;
+          expect(err).to.be.null;
 
-        expect(responseStatus).to.equal(200);
+          expect(responseStatus).to.equal(200);
 
-        expect(responseBody)
-          .to.be.an("array")
-          .that.has.lengthOf(2);
+          expect(responseBody)
+            .to.be.an("array")
+            .that.has.lengthOf(2);
 
-        expect(responseBody[0])
-          .to.be.an("object")
-          .that.includes({
-            user: "lilo10@gmail.com",
-            exercise: "weightlifting",
-            duration: 30,
-            calories: 100
-          });
+          expect(responseBody[0])
+            .to.be.an("object")
+            .that.includes({
+              user: "lilo10@gmail.com",
+              exercise: "weightlifting",
+              duration: 30,
+              calories: 100
+            });
 
-        expect(responseBody[1])
-          .to.be.an("object")
-          .that.includes({
-            user: "lilo11@gmail.com",
-            exercise: "sprinting",
-            duration: 30,
-            calories: 300
-          });
+          expect(responseBody[1])
+            .to.be.an("object")
+            .that.includes({
+              user: "lilo10@gmail.com",
+              exercise: "sprinting",
+              duration: 30,
+              calories: 300
+            });
 
-        done();
-      });
+          done();
+        });
     });
   });
 });

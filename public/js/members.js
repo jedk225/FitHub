@@ -397,9 +397,9 @@ $(document).ready(function() {
           purple: "rgb(153, 102, 255)",
           grey: "rgb(231,233,237)",
           black: "rgb(255,255,255)",
-          bluebg: "rgb(54, 162, 235, 0.2)",
-          redbg: "rgb(255, 99, 132, 0.2)",
-          yellowbg: "rgb(255, 205, 86, 0.2)"
+          bluebg: "rgba(54, 162, 235, 0.2)",
+          redbg: "rgba(255, 99, 132, 0.2)",
+          yellowbg: "rgba(255, 205, 86, 0.2)"
         };
 
         //create chart
