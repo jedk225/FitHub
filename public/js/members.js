@@ -126,7 +126,7 @@ $(document).ready(function() {
           "<label for='inputAge'>Age</label><input class='form-control' id='inputAge'" +
           "placeholder='35'></div><div class='form-group col-md-4'><label " +
           "for='inputSex'>Sex</label><select id='inputSex' class='form-control'><option " +
-          "selected>Choose...</option><option value='Male'>Male</option><option value='Female'>Female</option><option value='A Lot'>A " +
+          "selected>Choose...</option><option value='male'>Male</option><option value='female'>Female</option><option value='A Lot'>A " +
           "Lot</option></select></div><div class='form-group col-md-4'>" +
           "<label for='inputWeight'>Weight (LBS)</label><input class='form-control' id='inputWeight'" +
           "placeholder='150'></div></div><label for='height'>Height</label><div class='form-row height'>" +
