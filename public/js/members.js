@@ -87,6 +87,8 @@ $(document).ready(function() {
     $(".hubDisp").append(
       "<h3 class='stat'>BMR - " + userHub.BMR + " Kcal/day</h3>"
     );
+    $(".hubDisp").append("<h3 class='stat'>Goal - " + userHub.goal);
+
     console.log(userHub);
     var picSrc = "";
     var BMI = parseInt(userHub.BMI);
@@ -124,13 +126,15 @@ $(document).ready(function() {
           "<label for='inputAge'>Age</label><input class='form-control' id='inputAge'" +
           "placeholder='35'></div><div class='form-group col-md-4'><label " +
           "for='inputSex'>Sex</label><select id='inputSex' class='form-control'><option " +
-          "selected>Choose...</option><option value='male'>Male</option><option value='female'>Female</option><option value='A Lot'>A " +
+          "selected>Choose...</option><option value='Male'>Male</option><option value='Female'>Female</option><option value='A Lot'>A " +
           "Lot</option></select></div><div class='form-group col-md-4'>" +
           "<label for='inputWeight'>Weight (LBS)</label><input class='form-control' id='inputWeight'" +
           "placeholder='150'></div></div><label for='height'>Height</label><div class='form-row height'>" +
           "<div class='form-group col-md-3'><input class='form-control' id='inputFt'" +
           "placeholder='ft'></div><div class='form-group col-md-3'>" +
-          "<input class='form-control' id='inputIn' placeholder='in'></div></div><br><br><button class='btn btn-primary btn-block'" +
+          "<input class='form-control' id='inputIn' placeholder='in'></div></div><br><br>" +
+          "<label>Which of the following best describes your primary fitness goal? <select multiple id='goal'><option value='Gain Muscle'>I want to gain muscle mass</option> <option value='Lose Weight'>I want to lose weight</option> <option value='Healthy Eating'>I want to eat healthier</option> <option value='Skill Improvement'>I want to improve my sports skills (batting practice, jump shot, etc.)</option> </select> </label>" +
+          "<button class='btn btn-primary btn-block'" +
           "id='userInfo'>Submit</button></form>"
       );
       $("#userInfo").off();
@@ -164,6 +168,8 @@ $(document).ready(function() {
               .val()
               .trim()
           );
+        var goal = $("#goal option:selected").val();
+        console.log("Goal: " + goal);
         if (isNaN(age) || isNaN(weight) || isNaN(height)) {
           console.log("NaN");
           alert("Please provide valid input!");
@@ -173,7 +179,8 @@ $(document).ready(function() {
             sex: sex,
             age: age,
             height: height,
-            weight: weight
+            weight: weight,
+            goal: goal
           };
           $.post("/api/health", userInfo).then(function(res) {
             if (res) {

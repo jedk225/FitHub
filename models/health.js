@@ -20,6 +20,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.FLOAT,
       allowNull: false
     },
+    goal: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     BMI: {
       type: DataTypes.FLOAT
     },
