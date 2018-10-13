@@ -182,6 +182,7 @@ $(document).ready(function() {
             weight: weight,
             goal: goal
           };
+          console.log("userInfo: " + userInfo);
           $.post("/api/health", userInfo).then(function(res) {
             if (res) {
               userHub = res;
