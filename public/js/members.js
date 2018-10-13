@@ -87,6 +87,8 @@ $(document).ready(function() {
     $(".hubDisp").append(
       "<h3 class='stat'>BMR - " + userHub.BMR + " Kcal/day</h3>"
     );
+    $(".hubDisp").append("<h3 class='stat'>Goal - " + userHub.goal);
+
     console.log(userHub);
     var picSrc = "";
     var BMI = parseInt(userHub.BMI);
@@ -130,7 +132,9 @@ $(document).ready(function() {
           "placeholder='150'></div></div><label for='height'>Height</label><div class='form-row height'>" +
           "<div class='form-group col-md-3'><input class='form-control' id='inputFt'" +
           "placeholder='ft'></div><div class='form-group col-md-3'>" +
-          "<input class='form-control' id='inputIn' placeholder='in'></div></div><br><br><button class='btn btn-primary btn-block'" +
+          "<input class='form-control' id='inputIn' placeholder='in'></div></div><br><br>" +
+          "<label>Which of the following best describes your primary fitness goal? <select multiple id='goal'><option value='Gain Muscle'>I want to gain muscle mass</option> <option value='Lose Weight'>I want to lose weight</option> <option value='Healthy Eating'>I want to eat healthier</option> <option value='Skill Improvement'>I want to improve my sports skills (batting practice, jump shot, etc.)</option> </select> </label>" +
+          "<button class='btn btn-primary btn-block'" +
           "id='userInfo'>Submit</button></form>"
       );
       $("#userInfo").off();
@@ -164,6 +168,8 @@ $(document).ready(function() {
               .val()
               .trim()
           );
+        var goal = $("#goal option:selected").val();
+        console.log("Goal: " + goal);
         if (isNaN(age) || isNaN(weight) || isNaN(height)) {
           console.log("NaN");
           alert("Please provide valid input!");
@@ -173,8 +179,10 @@ $(document).ready(function() {
             sex: sex,
             age: age,
             height: height,
-            weight: weight
+            weight: weight,
+            goal: goal
           };
+          console.log("userInfo: " + userInfo);
           $.post("/api/health", userInfo).then(function(res) {
             if (res) {
               userHub = res;

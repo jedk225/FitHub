@@ -98,6 +98,7 @@ module.exports = function(app) {
       age: req.body.age,
       height: req.body.height,
       weight: req.body.weight,
+      goal: req.body.goal,
       BMI: bmiVal,
       BMR: bmrVal
     }).then(function(data) {
