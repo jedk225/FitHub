@@ -149,8 +149,8 @@ module.exports = function(app) {
     //Call to get a "calories burned" response from Nutritionix API
     rapid
       .call("Nutritionix", "getCaloriesBurnedForExercises", {
-        applicationSecret: "1cda535374b6a8253ab9d3e5a2811c41",
-        applicationId: "d93ce29b",
+        applicationSecret: process.env.applicationSecret,
+        applicationId: process.env.applicationId,
         exerciseDescription: req.body.userWork
       })
       .on("success", function(payload) {
@@ -181,9 +181,9 @@ module.exports = function(app) {
     //Call to get a "calories consumed" response from Nutritionix API
     rapid
       .call("Nutritionix", "getFoodsNutrients", {
-        applicationSecret: "1cda535374b6a8253ab9d3e5a2811c41",
+        applicationSecret: process.env.applicationSecret,
         foodDescription: req.body.userFood,
-        applicationId: "d93ce29b"
+        applicationId: process.env.applicationId
       })
       .on("success", function(payload) {
         for (var i = 0; i < payload[0].foods.length; i++) {
