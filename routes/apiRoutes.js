@@ -1,7 +1,7 @@
 var db = require("../models");
 var passport = require("../config/passport");
 var RapidAPI = require("rapidapi-connect");
-var health = require("./../utils/index");
+var health = require("../utils/index");
 var rapid = new RapidAPI(
   "default-application_5bb6e0b2e4b085e3f4087a6f",
   "fa960f0e-9c7c-4e96-9c1c-a9529be412e5"
@@ -74,7 +74,6 @@ module.exports = function(app) {
 
   // Route for posting new user health profile
   app.post("/api/health", function(req, res) {
-    health = require("healthstats");
     console.log("health: ", health);
     console.log("Posted to API/health");
     var bmiVal;
@@ -179,6 +178,7 @@ module.exports = function(app) {
 
   app.post("/api/calcfood", function(req, res) {
     //Call to get a "calories consumed" response from Nutritionix API
+    console.log("POST /api/calcfood ", process.env.applicationSecret);
     rapid
       .call("Nutritionix", "getFoodsNutrients", {
         applicationSecret: process.env.applicationSecret,
