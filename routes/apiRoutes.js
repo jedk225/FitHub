@@ -146,6 +146,9 @@ module.exports = function(app) {
 
   app.post("/api/calcwork", function(req, res) {
     //Call to get a "calories burned" response from Nutritionix API
+    console.log("POST /api/calcwork API KEY: ", process.env.applicationSecret);
+    console.log("POST /api/calcwork ID: ", process.env.applicationId);
+
     rapid
       .call("Nutritionix", "getCaloriesBurnedForExercises", {
         applicationSecret: process.env.applicationSecret,
@@ -178,7 +181,9 @@ module.exports = function(app) {
 
   app.post("/api/calcfood", function(req, res) {
     //Call to get a "calories consumed" response from Nutritionix API
-    console.log("POST /api/calcfood ", process.env.applicationSecret);
+    console.log("POST /api/calcfood API KEY: ", process.env.applicationSecret);
+    console.log("POST /api/calcfood ID: ", process.env.applicationId);
+
     rapid
       .call("Nutritionix", "getFoodsNutrients", {
         applicationSecret: process.env.applicationSecret,
