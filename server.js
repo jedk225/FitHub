@@ -1,4 +1,7 @@
+// Read and set environment variables
 require("dotenv").config();
+
+//Dependencies
 var express = require("express");
 var exphbs = require("express-handlebars");
 var db = require("./models");
