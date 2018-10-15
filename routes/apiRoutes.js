@@ -2,10 +2,7 @@ var db = require("../models");
 var passport = require("../config/passport");
 var RapidAPI = require("rapidapi-connect");
 var health = require("../utils/index");
-var rapid = new RapidAPI(
-  "default-application_5bb6e0b2e4b085e3f4087a6f",
-  "fa960f0e-9c7c-4e96-9c1c-a9529be412e5"
-);
+var rapid = new RapidAPI(process.env.rapidId, process.env.rapidSecret);
 
 module.exports = function(app) {
   // Using the passport.authenticate middleware with our local strategy.
@@ -161,7 +158,7 @@ module.exports = function(app) {
           duration += Math.round(payload[0].exercises[i].duration_min);
         }
 
-        if (req.body.userEmail) {
+        if (req.body.userEmail && payload[0].exercises[0]) {
           db.Cal.create({
             user: req.body.userEmail,
             exercise: payload[0].exercises[0].name,
@@ -182,8 +179,8 @@ module.exports = function(app) {
     //Call to get a "calories burned" response from Nutritionix API
     rapid
       .call("Nutritionix", "getCaloriesBurnedForExercises", {
-        applicationSecret: "1cda535374b6a8253ab9d3e5a2811c41",
-        applicationId: "d93ce29b",
+        applicationSecret: process.env.applicationSecret,
+        applicationId: process.env.applicationId,
         exerciseDescription: req.body.userWork
       })
       .on("success", function(payload) {
@@ -194,7 +191,7 @@ module.exports = function(app) {
           duration += Math.round(payload[0].exercises[i].duration_min);
         }
 
-        if (req.body.userEmail) {
+        if (req.body.userEmail && payload[0].exercises[0]) {
           db.Cal.update(
             {
               exercise: payload[0].exercises[0].name,
@@ -248,7 +245,7 @@ module.exports = function(app) {
           var proteins = Math.round(payload[0].foods[i].nf_protein);
           var fat = Math.round(payload[0].foods[i].nf_total_fat);
 
-          if (req.body.userEmail) {
+          if (req.body.userEmail && payload[0].foods) {
             db.Food.create({
               user: req.body.userEmail,
               food: food,
@@ -272,9 +269,9 @@ module.exports = function(app) {
     //Call to get a "calories consumed" response from Nutritionix API
     rapid
       .call("Nutritionix", "getFoodsNutrients", {
-        applicationSecret: "1cda535374b6a8253ab9d3e5a2811c41",
+        applicationSecret: process.env.applicationSecret,
         foodDescription: req.body.userFood,
-        applicationId: "d93ce29b"
+        applicationId: process.env.applicationId
       })
       .on("success", function(payload) {
         for (var i = 0; i < payload[0].foods.length; i++) {
@@ -288,7 +285,7 @@ module.exports = function(app) {
           var proteins = Math.round(payload[0].foods[i].nf_protein);
           var fat = Math.round(payload[0].foods[i].nf_total_fat);
 
-          if (req.body.userEmail) {
+          if (req.body.userEmail && payload[0].foods) {
             db.Food.update(
               {
                 food: food,

@@ -13,7 +13,8 @@
     "database": "testdb",
     "host": "localhost",
     "dialect": "mysql",
-    "logging": false
+    "logging": false,
+    "port": 3300
   },
   "production": {
     "use_env_variable": "JAWSDB_URL",
