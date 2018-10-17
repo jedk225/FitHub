@@ -1,7 +1,46 @@
 # Project-2-UCI
 Project 2 for the Coding Bootcamp at UCI
 
-# Group Do: Designing your MVP
+# burger
+Node Express Handlebars Assignment
+
+FitHub is a web application that empowers people to take charge of their health and encourage them to make smart life choices
+
+* Users can track active calories burned based on exercise type
+* Users can track calories and macros consumed by food description and serving quantity
+* FitHub will give users realtime visual feedback on net caloric intake and a macros intake summary
+
+# Link to Deployed App
+https://frozen-eyrie-10750.herokuapp.com
+
+# Technologies
+```
+1. Node.js
+2. Express
+3. NPM
+4. Foundation
+5. MySQL Database
+6. Sequelize
+```
+
+# Dependencies
+```
+1. express
+2. express-handlebars
+3. sequelize
+4. mysql
+5. rapidapi-connect
+6. chart.js
+
+Please install the required packages listed above by typing 'npm install' in the command line.
+```
+
+## Contributers
+* Chad Tao
+* Jed Kim
+* Lilo Valdez
+
+---
 
 ## Proposal
 * With your group, answer each of the following questions:
