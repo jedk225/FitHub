@@ -18,7 +18,7 @@ $(document).ready(function() {
     var id = $(this).attr("id");
     $(".disp").html(
       "<br><br><form><div class='form-row'><div class='form-group col-md-6'><label for='inputExercise'>Exercise</label><input type='text' class='form-control' id='inputExercise' placeholder='Running'></div><div class='form-group col-md-6'><label for='inputDuration'>Duration</label><input type='text' class='form-control' id='inputDuration' placeholder='30 min'></div></div>" +
-        "<button type='submit' class='btn btn-warning' id='burnSubmit'>Submit</button></form>"
+        "<button type='submit' class='alert button' id='burnSubmit'>Submit</button></form>"
     );
     $("#burnSubmit").click(function(event) {
       event.preventDefault();
@@ -187,25 +187,21 @@ $(document).ready(function() {
     var picSrc = "";
     var BMI = parseInt(userHub.BMI);
     if (BMI < 18) {
-      picSrc = "skele.jpg";
+      picSrc = "skele.png";
     } else if ((18 <= BMI) & (BMI < 22)) {
-      picSrc = userHub.sex + "-1.jpg";
+      picSrc = userHub.sex + "-1.png";
     } else if ((22 <= BMI) & (BMI < 25)) {
-      picSrc = userHub.sex + "-2.jpg";
+      picSrc = userHub.sex + "-2.png";
     } else if ((25 <= BMI) & (BMI < 28)) {
-      picSrc = userHub.sex + "-3.jpg";
+      picSrc = userHub.sex + "-3.png";
     } else if ((28 <= BMI) & (BMI < 31)) {
-      picSrc = userHub.sex + "-4.jpg";
+      picSrc = userHub.sex + "-4.png";
     } else if ((31 <= BMI) & (BMI < 34)) {
-      picSrc = userHub.sex + "-5.jpg";
+      picSrc = userHub.sex + "-5.png";
     } else if (34 <= BMI) {
-      picSrc = userHub.sex + "-6.jpg";
+      picSrc = userHub.sex + "-6.png";
     }
-    $(".hubDisp").append(
-      "<img style='width:250;height:400;position:relative;top:-300;right:-400' src='../images/" +
-        picSrc +
-        "'/>"
-    );
+    $(".hubDisp").append("<img src='../images/" + picSrc + "'/>");
   }
 
   //Hub Info Input Form

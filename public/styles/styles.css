@@ -1,3 +1,7 @@
+* {
+  font-family: 'Raleway', sans-serif;
+}
+
 body {
   background: url("../images/background.jpg") 100% 0 no-repeat;
   display: block;
@@ -6,6 +10,18 @@ body {
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
+}
+
+.fithubLogoLg {
+  margin-top: 20vh!important;
+  margin-bottom: 2vh!important;
+  width: 80v
+}
+
+.fithubLogoMembers {
+  margin-top: 4vh!important;
+  margin-bottom: 2vh!important;
+  width: 40vw;
 }
 
 .centerThis {
@@ -22,4 +38,22 @@ body {
 
 .stat {
   font-family: "Josefin Sans", sans-serif;
+}
+
+.float-right {
+  float: right;
+}
+
+.navbarFithub {
+  background-color: rgb(89, 109, 116);
+  color: rgb(252, 252, 252);
+}
+
+.card {
+  background-color: rgba(89, 109, 116, 0.363);
+  margin-top: 10vh;
+}
+
+.whiteText {
+  color: white;
 }
