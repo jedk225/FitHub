@@ -2,10 +2,7 @@ var db = require("../models");
 var passport = require("../config/passport");
 var RapidAPI = require("rapidapi-connect");
 var health = require("../utils/index");
-var rapid = new RapidAPI(
-  "default-application_5bb6e0b2e4b085e3f4087a6f",
-  "fa960f0e-9c7c-4e96-9c1c-a9529be412e5"
-);
+var rapid = new RapidAPI(process.env.rapidId, process.env.rapidSecret);
 
 module.exports = function(app) {
   // Using the passport.authenticate middleware with our local strategy.
@@ -144,6 +141,7 @@ module.exports = function(app) {
     });
   });
 
+  //calculate workout
   app.post("/api/calcwork", function(req, res) {
     //Call to get a "calories burned" response from Nutritionix API
     rapid
@@ -160,7 +158,7 @@ module.exports = function(app) {
           duration += Math.round(payload[0].exercises[i].duration_min);
         }
 
-        if (req.body.userEmail) {
+        if (req.body.userEmail && payload[0].exercises[0]) {
           db.Cal.create({
             user: req.body.userEmail,
             exercise: payload[0].exercises[0].name,
@@ -176,9 +174,59 @@ module.exports = function(app) {
       });
   });
 
+  //update workout
+  app.post("/api/updatework", function(req, res) {
+    //Call to get a "calories burned" response from Nutritionix API
+    rapid
+      .call("Nutritionix", "getCaloriesBurnedForExercises", {
+        applicationSecret: process.env.applicationSecret,
+        applicationId: process.env.applicationId,
+        exerciseDescription: req.body.userWork
+      })
+      .on("success", function(payload) {
+        var calories = 0;
+        var duration = 0;
+        for (var i = 0; i < payload[0].exercises.length; i++) {
+          calories += Math.round(payload[0].exercises[i].nf_calories);
+          duration += Math.round(payload[0].exercises[i].duration_min);
+        }
+
+        if (req.body.userEmail && payload[0].exercises[0]) {
+          db.Cal.update(
+            {
+              exercise: payload[0].exercises[0].name,
+              duration: duration,
+              calories: calories
+            },
+            {
+              where: {
+                id: req.body.id
+              }
+            }
+          ).then(function(dbCal) {
+            res.json(dbCal);
+          });
+        }
+      })
+      .on("error", function() {
+        console.log("Error");
+      });
+  });
+
+  //delete workout
+  app.delete("/api/work/:id", function(req, res) {
+    db.Cal.destroy({
+      where: {
+        id: req.params.id
+      }
+    }).then(function(result) {
+      res.json(result);
+    });
+  });
+
+  //calculate food
   app.post("/api/calcfood", function(req, res) {
     //Call to get a "calories consumed" response from Nutritionix API
-    console.log("POST /api/calcfood ", process.env.applicationSecret);
     rapid
       .call("Nutritionix", "getFoodsNutrients", {
         applicationSecret: process.env.applicationSecret,
@@ -197,7 +245,7 @@ module.exports = function(app) {
           var proteins = Math.round(payload[0].foods[i].nf_protein);
           var fat = Math.round(payload[0].foods[i].nf_total_fat);
 
-          if (req.body.userEmail) {
+          if (req.body.userEmail && payload[0].foods) {
             db.Food.create({
               user: req.body.userEmail,
               food: food,
@@ -214,5 +262,62 @@ module.exports = function(app) {
       .on("error", function() {
         console.log("Error");
       });
+  });
+
+  //update food
+  app.post("/api/updatefood", function(req, res) {
+    //Call to get a "calories consumed" response from Nutritionix API
+    rapid
+      .call("Nutritionix", "getFoodsNutrients", {
+        applicationSecret: process.env.applicationSecret,
+        foodDescription: req.body.userFood,
+        applicationId: process.env.applicationId
+      })
+      .on("success", function(payload) {
+        for (var i = 0; i < payload[0].foods.length; i++) {
+          console.log(payload[0].foods[i]);
+          var food = payload[0].foods[i].food_name;
+          var caloriesFood = Math.round(payload[0].foods[i].nf_calories);
+          var serving = payload[0].foods[i].serving_qty;
+
+          // Macros (Carbs, Protein, and Fat) in grams
+          var carbs = Math.round(payload[0].foods[i].nf_total_carbohydrate);
+          var proteins = Math.round(payload[0].foods[i].nf_protein);
+          var fat = Math.round(payload[0].foods[i].nf_total_fat);
+
+          if (req.body.userEmail && payload[0].foods) {
+            db.Food.update(
+              {
+                food: food,
+                servings: serving,
+                calories: caloriesFood,
+                carbs: carbs,
+                protein: proteins,
+                fat: fat
+              },
+              {
+                where: {
+                  id: req.body.id
+                }
+              }
+            );
+          }
+        }
+        res.send(payload[0].foods);
+      })
+      .on("error", function() {
+        console.log("Error");
+      });
+  });
+
+  //delete food intake
+  app.delete("/api/food/:id", function(req, res) {
+    db.Food.destroy({
+      where: {
+        id: req.params.id
+      }
+    }).then(function(result) {
+      res.json(result);
+    });
   });
 };

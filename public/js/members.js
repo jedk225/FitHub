@@ -7,6 +7,100 @@ $(document).ready(function() {
     user = data.email;
   });
 
+  //update and delete data
+  $(document).on("click", ".updateBurn", updateBurn);
+  $(document).on("click", ".deleteBurn", deleteBurn);
+  $(document).on("click", ".updateIntake", updateIntake);
+  $(document).on("click", ".deleteIntake", deleteIntake);
+
+  //update exercise
+  function updateBurn() {
+    var id = $(this).attr("id");
+    $(".disp").html(
+      "<br><br><form><div class='form-row'><div class='form-group col-md-6'><label for='inputExercise'>Exercise</label><input type='text' class='form-control' id='inputExercise' placeholder='Running'></div><div class='form-group col-md-6'><label for='inputDuration'>Duration</label><input type='text' class='form-control' id='inputDuration' placeholder='30 min'></div></div>" +
+        "<button type='submit' class='alert button' id='burnSubmit'>Submit</button></form>"
+    );
+    $("#burnSubmit").click(function(event) {
+      event.preventDefault();
+      var userWork =
+        $("#inputExercise")
+          .val()
+          .trim() +
+        " for " +
+        $("#inputDuration")
+          .val()
+          .trim();
+      console.log(userWork);
+      $.post("/api/updatework", {
+        userWork: userWork,
+        userEmail: user,
+        id: id
+      }).then(function(data) {
+        if (data) {
+          $("#burns").click();
+        }
+      });
+    });
+  }
+
+  //delete exercise
+  function deleteBurn(event) {
+    event.stopPropagation();
+    var id = $(this).attr("id");
+    $.ajax({
+      method: "DELETE",
+      url: "/api/work/" + id
+    }).then(function(res) {
+      if (res) {
+        $("#burns").click();
+      }
+    });
+  }
+
+  //update intake
+  function updateIntake() {
+    var id = $(this).attr("id");
+    $(".disp").html(
+      "<br><br><form><div class='form-row'><div class='form-group col-md-6'><label for='inputFood'>Food</label><input type='text' class='form-control' id='inputFood' placeholder='Lobster'></div><div class='form-group col-md-6'><label for='inputServing'>Servings</label><input type='text' class='form-control' id='inputServing' placeholder='10'></div></div>" +
+        "<button type='submit' class='btn btn-warning' id='inputSubmit'>Submit</button></form>"
+    );
+    $("#inputSubmit").click(function(event) {
+      event.preventDefault();
+      var userIntake =
+        $("#inputServing")
+          .val()
+          .trim() +
+        " " +
+        $("#inputFood")
+          .val()
+          .trim();
+      console.log(userIntake);
+      $.post("/api/updatefood", {
+        userFood: userIntake,
+        userEmail: user,
+        id: id
+      }).then(function(data) {
+        if (data) {
+          $("#intake").click();
+        }
+      });
+    });
+  }
+
+  //delete intake
+  function deleteIntake(event) {
+    event.stopPropagation();
+    var id = $(this).attr("id");
+    $.ajax({
+      method: "DELETE",
+      url: "/api/food/" + id
+    }).then(function(res) {
+      if (res) {
+        $("#intake").click();
+      }
+    });
+  }
+
   //Add Activity
   $("#workout-button").click(function(event) {
     //Prevent page from reloading
@@ -93,25 +187,21 @@ $(document).ready(function() {
     var picSrc = "";
     var BMI = parseInt(userHub.BMI);
     if (BMI < 18) {
-      picSrc = "skele.jpg";
+      picSrc = "skele.png";
     } else if ((18 <= BMI) & (BMI < 22)) {
-      picSrc = userHub.sex + "-1.jpg";
+      picSrc = userHub.sex + "-1.png";
     } else if ((22 <= BMI) & (BMI < 25)) {
-      picSrc = userHub.sex + "-2.jpg";
+      picSrc = userHub.sex + "-2.png";
     } else if ((25 <= BMI) & (BMI < 28)) {
-      picSrc = userHub.sex + "-3.jpg";
+      picSrc = userHub.sex + "-3.png";
     } else if ((28 <= BMI) & (BMI < 31)) {
-      picSrc = userHub.sex + "-4.jpg";
+      picSrc = userHub.sex + "-4.png";
     } else if ((31 <= BMI) & (BMI < 34)) {
-      picSrc = userHub.sex + "-5.jpg";
+      picSrc = userHub.sex + "-5.png";
     } else if (34 <= BMI) {
-      picSrc = userHub.sex + "-6.jpg";
+      picSrc = userHub.sex + "-6.png";
     }
-    $(".hubDisp").append(
-      "<img style='width:250;height:400;position:relative;top:-300;right:-400' src='../images/" +
-        picSrc +
-        "'/>"
-    );
+    $(".hubDisp").append("<img src='../images/" + picSrc + "'/>");
   }
 
   //Hub Info Input Form
@@ -223,15 +313,23 @@ $(document).ready(function() {
         );
         for (i = 0; i < res.length; i++) {
           $("#table").append(
-            "<tr><td>" +
+            "<tr><td class='canEdit exercise" +
+              res[i].id +
+              "'>" +
               res[i].exercise +
-              "</td><td>" +
+              "</td><td class='canEdit duration" +
+              res[i].id +
+              "'>" +
               res[i].duration +
-              "</td><td>" +
+              "</td><div></div><td>" +
               res[i].calories +
               "</td><td>" +
               moment(res[i].createdAt).format("HH:mm MM-DD-YY") +
-              "</td></tr>"
+              "</td><td><button class='updateBurn btn-sm btn-danger' id='" +
+              res[i].id +
+              "'>Update</button></td><td><button class='deleteBurn btn-sm btn-danger' id='" +
+              res[i].id +
+              "'>x</button></td></tr>"
           );
         }
       });
@@ -250,9 +348,9 @@ $(document).ready(function() {
         );
         for (i = 0; i < res.length; i++) {
           $("#table").append(
-            "<tr><td>" +
+            "<tr><td class='canEdit'>" +
               res[i].food +
-              "</td><td>" +
+              "</td><td class='canEdit'>" +
               res[i].servings +
               "</td><td>" +
               res[i].calories +
@@ -264,7 +362,11 @@ $(document).ready(function() {
               res[i].fat +
               "</td><td>" +
               moment(res[i].createdAt).format("HH:mm MM-DD-YY") +
-              "</td></tr>"
+              "</td><td><button class='updateIntake btn-sm btn-danger' id='" +
+              res[i].id +
+              "'>Update</button></td><td><button class='deleteIntake btn-sm btn-danger' id='" +
+              res[i].id +
+              "'>x</button></td></tr>"
           );
         }
       });
